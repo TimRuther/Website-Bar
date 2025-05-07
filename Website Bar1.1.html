@@ -4,141 +4,163 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guthaben-Verwaltung</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="container">
-        <h1>Guthaben-Verwaltung</h1>
-        <form id="entryForm">
-            <input type="text" id="name" placeholder="Name" required>
-            <input type="number" id="balance" placeholder="Startguthaben" required>
-            <input type="password" id="startPassword" placeholder="Passwort für Startguthaben" required>
-            <button type="submit">Hinzufügen</button>
-        </form>
-        <h2>Personen</h2>
-        <ul id="balanceList"></ul>
-        <h2>Guthaben ändern</h2>
-        <form id="updateForm">
-            <select id="personSelect"></select>
-            <input type="number" id="amount" placeholder="Betrag" required>
-            <input type="password" id="password" placeholder="Passwort" required>
-            <button type="button" onclick="updateBalance(true)">Gutschreiben</button>
-            <button type="button" onclick="updateBalance(false)">Abziehen</button>
-        </form>
-    </div>
-    <script>
-        let database = {};
-        const adminPassword = "1234"; // Sicheres Passwort setzen
-        const startPassword = "adminStart"; // Passwort für Startguthaben
-
-        document.getElementById('entryForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            let name = document.getElementById('name').value;
-            let balance = parseFloat(document.getElementById('balance').value);
-            let enteredPassword = document.getElementById('startPassword').value;
-
-            if (enteredPassword !== startPassword) {
-                alert("Falsches Passwort für Startguthaben!");
-                return;
-            }
-
-            if (!(name in database)) {
-                database[name] = balance;
-                updateUI();
-            }
-            document.getElementById('entryForm').reset();
-        });
-
-        function updateUI() {
-            let balanceList = document.getElementById('balanceList');
-            let personSelect = document.getElementById('personSelect');
-            balanceList.innerHTML = '';
-            personSelect.innerHTML = '';
-            for (let person in database) {
-                let listItem = document.createElement('li');
-                listItem.textContent = `${person}: ${database[person]} €`;
-                balanceList.appendChild(listItem);
-                let option = document.createElement('option');
-                option.value = person;
-                option.textContent = person;
-                personSelect.appendChild(option);
-            }
-        }
-
-        function updateBalance(isCredit) {
-            let person = document.getElementById('personSelect').value;
-            let amount = parseFloat(document.getElementById('amount').value);
-            let password = document.getElementById('password').value;
-            
-            if (password !== adminPassword) {
-                alert("Falsches Passwort!");
-                return;
-            }
-            
-            if (person && !isNaN(amount)) {
-                if (isCredit) {
-                    database[person] += amount;
-                } else {
-                    database[person] -= amount;
-                }
-                updateUI();
-            }
-            document.getElementById('updateForm').reset();
-        }
-    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #2c3e50;
+            font-family: 'Inter', sans-serif;
+            background: url('Logo_GLH.svg') repeat;
+            background-size: 80px;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
         }
         .container {
-            background: #ecf0f1;
+            background: rgba(255, 255, 255, 0.95);
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            max-width: 400px;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            max-width: 500px;
             width: 100%;
         }
         h1, h2 {
-            color: #34495e;
+            color: #2c3e50;
         }
         input, button, select {
             margin: 10px 0;
-            padding: 10px;
+            padding: 12px;
             font-size: 16px;
             width: 100%;
-            border: 1px solid #bdc3c7;
-            border-radius: 5px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-sizing: border-box;
         }
         button {
-            background-color: #3498db;
+            background: #3498db;
             color: white;
             border: none;
-            cursor: pointer;
+            font-weight: 600;
             transition: background 0.3s;
         }
         button:hover {
-            background-color: #2980b9;
+            background: #2980b9;
         }
         ul {
             list-style: none;
             padding: 0;
         }
         li {
-            background: #95a5a6;
+            background: #ecf0f1;
             margin: 5px 0;
-            padding: 10px;
-            border-radius: 5px;
-            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            color: #34495e;
+            text-align: left;
         }
     </style>
+</head>
+<body>
+<div class="container">
+    <h1>Guthaben-Verwaltung</h1>
+    <form id="entryForm">
+        <input type="text" id="number" placeholder="Nummer (z.B. 1001)" required>
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="number" id="balance" placeholder="Startguthaben" required>
+        <input type="password" id="startPassword" placeholder="Passwort für Startguthaben" required>
+        <button type="submit">Hinzufügen</button>
+    </form>
+    <h2>Personen</h2>
+    <ul id="balanceList"></ul>
+    <h2>Guthaben abbuchen</h2>
+    <form id="updateForm">
+        <select id="personSelect"></select>
+        <input type="number" id="amount" placeholder="Betrag (nur positiv)" min="0.01" step="0.01" required>
+        <input type="password" id="password" placeholder="Passwort" required>
+        <button type="button" onclick="updateBalance()">Geld abbuchen</button>
+    </form>
+</div>
+<script>
+    let database = JSON.parse(localStorage.getItem('guthabenDB')) || {};
+
+    const adminPassword = "1234";
+    const startPassword = "123";
+
+    document.getElementById('entryForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        let number = document.getElementById('number').value;
+        let name = document.getElementById('name').value;
+        let balance = parseFloat(document.getElementById('balance').value);
+        let enteredPassword = document.getElementById('startPassword').value;
+
+        if (enteredPassword !== startPassword) {
+            alert("Falsches Passwort für Startguthaben!");
+            return;
+        }
+
+        if (!(number in database)) {
+            database[number] = { name: name, balance: balance };
+            saveDatabase();
+            updateUI();
+        } else {
+            alert("Nummer existiert bereits!");
+        }
+
+        document.getElementById('entryForm').reset();
+    });
+
+    function saveDatabase() {
+        localStorage.setItem('guthabenDB', JSON.stringify(database));
+    }
+
+    function updateUI() {
+        let balanceList = document.getElementById('balanceList');
+        let personSelect = document.getElementById('personSelect');
+
+        balanceList.innerHTML = '';
+        personSelect.innerHTML = '';
+
+        for (let number in database) {
+            let entry = database[number];
+            let listItem = document.createElement('li');
+            listItem.textContent = `${number} - ${entry.name}: ${entry.balance.toFixed(2)} €`;
+            balanceList.appendChild(listItem);
+
+            let option = document.createElement('option');
+            option.value = number;
+            option.textContent = `${number} - ${entry.name}`;
+            personSelect.appendChild(option);
+        }
+    }
+
+    function updateBalance() {
+        let personNumber = document.getElementById('personSelect').value;
+        let amount = parseFloat(document.getElementById('amount').value);
+        let password = document.getElementById('password').value;
+
+        if (password !== adminPassword) {
+            alert("Falsches Passwort!");
+            return;
+        }
+
+        if (amount <= 0 || isNaN(amount)) {
+            alert("Bitte einen positiven Betrag eingeben!");
+            return;
+        }
+
+        if (personNumber) {
+            database[personNumber].balance -= amount;
+            saveDatabase();
+            updateUI();
+        }
+        document.getElementById('updateForm').reset();
+    }
+
+    updateUI();
+</script>
 </body>
 </html>
-
-
